@@ -5,7 +5,7 @@
  * or filesystem paths, without needing a full Workspace with filesystem/sandbox.
  */
 
-import type { RequestContext } from '../request-context';
+import type { DynamicArgument } from '../types';
 import type { Skill, SkillMetadata, SkillFormat, WorkspaceSkills } from '../workspace/skills/types';
 
 // =============================================================================
@@ -66,13 +66,6 @@ export interface InlineSkill extends Skill {
 export type SkillInput = string | InlineSkill;
 
 /**
- * Context passed to a dynamic skills resolver.
- */
-export interface AgentSkillsContext {
-  requestContext: RequestContext;
-}
-
-/**
  * Resolver for agent-level skills — static array or dynamic function.
  *
  * @example Static skills
@@ -93,6 +86,9 @@ export interface AgentSkillsContext {
  * }
  * ```
  */
-export type AgentSkillsInput = SkillInput[] | ((context: AgentSkillsContext) => SkillInput[] | Promise<SkillInput[]>);
+export type AgentSkillsInput<TRequestContext extends Record<string, any> | unknown = unknown> = DynamicArgument<
+  SkillInput[],
+  TRequestContext
+>;
 
 export type { Skill, SkillMetadata, SkillFormat, WorkspaceSkills };

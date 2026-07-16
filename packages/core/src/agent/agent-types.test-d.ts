@@ -151,6 +151,40 @@ describe('Agent Type Tests', () => {
 
       expectTypeOf(config.id).toEqualTypeOf<'test-agent'>();
     });
+
+    it('should type requestContext in skills function based on requestContextSchema', () => {
+      const config: AgentConfig<
+        'test-agent',
+        Record<string, never>,
+        undefined,
+        { userId: string; tenantId: string }
+      > = {
+        id: 'test-agent',
+        name: 'Test Agent',
+        model: {} as any,
+        requestContextSchema: z.object({
+          userId: z.string(),
+          tenantId: z.string(),
+        }),
+        instructions: 'You are a helpful assistant',
+        skills: ({ requestContext }) => {
+          // Verify requestContext is typed
+          expectTypeOf(requestContext).toEqualTypeOf<RequestContext<{ userId: string; tenantId: string }>>();
+
+          // Verify get() returns the correct type
+          const userId = requestContext.get('userId');
+          expectTypeOf(userId).toEqualTypeOf<string>();
+
+          // Verify .all returns the typed object
+          const all = requestContext.all;
+          expectTypeOf(all).toEqualTypeOf<{ userId: string; tenantId: string }>();
+
+          return [];
+        },
+      };
+
+      expectTypeOf(config.id).toEqualTypeOf<'test-agent'>();
+    });
   });
 
   describe('Issue #16732: AgentExecutionOptions<undefined> should not require structuredOutput', () => {
